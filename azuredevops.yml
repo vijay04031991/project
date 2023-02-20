@@ -1,0 +1,43 @@
+trigger:
+- master
+
+stages:
+- stage: Deploy-D
+  displayName: Deploy to rg-test-d
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      displayName: Deploy to rg-test-d
+      inputs:
+        azureSubscription: <Azure_Subscription_Name>
+        resourceGroupName: rg-test-d
+        location: <Azure_Region>
+        templateLocation: 'Linked artifact'
+        csmFile: <ARM_Template_File_Path>
+        csmParametersFile: <ARM_Template_Parameters_File_Path>
+        deploymentMode: 'Incremental'
+        deploymentOutputs: 'ARM_Deployment_Outputs'
+
+- stage: Deploy-T
+  displayName: Deploy to rg-test-t
+  dependsOn: Deploy-D
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      displayName: Deploy to rg-test-t
+      inputs:
+        azureSubscription: <Azure_Subscription_Name>
+        resourceGroupName: rg-test-t
+        location: <Azure_Region>
+        templateLocation: 'Linked artifact'
+        csmFile: <ARM_Template_File_Path>
+        csmParametersFile: <ARM_Template_Parameters_File_Path>
+        deploymentMode: 'Incremental'
+        deploymentOutputs: 'ARM_Deployment_Outputs'
+
